@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>Кубик</title>
+    
+    <!-- PWA & Mobile App Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Кубик">
+    <link rel="apple-touch-icon" href="app-icon.jpg">
+    <link rel="icon" href="app-icon.jpg">
+    
+    <!-- Chart.js для графиков -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nosleep/0.12.0/NoSleep.min.js"></script>
+    <link rel="stylesheet" href="style.css?v=12">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Верхние кнопки (Настройки и Таблица лидеров) -->
+    <div class="top-buttons-container">
+        <button id="settings-btn" class="top-btn" title="Настройки">⚙️</button>
+        <button id="friends-btn" class="top-btn" title="Таблица лидеров">🏆</button>
+    </div>
+
+    <!-- Главный экран -->
+    <div class="game-container">
+        <!-- Последние 3 броска -->
+        <div class="recent-history-container">
+            <div class="recent-history-title" id="secret-trigger">ПРОШЛЫЕ:</div>
+            <div class="roll-history" id="roll-history">
+                <!-- Броски будут здесь -->
+            </div>
+        </div>
+
+        <!-- Кубик -->
+        <div class="dice-wrapper" id="dice-wrapper">
+            <div id="dice" class="dice-3d">
+                <!-- Внешние грани с точками -->
+                <div class="face front" id="face-front"></div>
+                <div class="face back" id="face-back"></div>
+                <div class="face right" id="face-right"></div>
+                <div class="face left" id="face-left"></div>
+                <div class="face top" id="face-top"></div>
+                <div class="face bottom" id="face-bottom"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Блок статистики внизу -->
+    <div class="bottom-area">
+        <div class="stats-toggle-container">
+            <button id="toggle-stats-btn">Статистика</button>
+            <button id="reset-stats-btn">Новая игра</button>
+        </div>
+        <div class="local-stats hidden" id="local-stats-container">
+            <div class="stats-column">
+                <div class="stats-title">Выпадения:</div>
+                <div id="falls-stats">
+                    <div>1: 0</div>
+                    <div>2: 0</div>
+                    <div>3: 0</div>
+                    <div>4: 0</div>
+                    <div>5: 0</div>
+                    <div>6: 0</div>
+                </div>
+            </div>
+            
+            <div class="rolls-total">
+                <div>Бросков:</div>
+                <div id="total-rolls">0</div>
+            </div>
+
+            <div class="stats-column">
+                <div class="stats-title">Шансы:</div>
+                <div id="chances-stats">
+                    <div>1: 0%</div>
+                    <div>2: 0%</div>
+                    <div>3: 0%</div>
+                    <div>4: 0%</div>
+                    <div>5: 0%</div>
+                    <div>6: 0%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно ввода имени -->
+    <div id="name-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Как вас зовут?</h2>
+            <p>Введите ваше имя для таблицы лидеров:</p>
+            <input type="text" id="username-input" placeholder="Имя..." maxlength="15">
+            <button id="save-name-btn">Начать</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно (Настройки) -->
+    <div class="modal" id="settings-modal" style="display: none;">
+        <div class="modal-content">
+            <button class="close-btn" id="close-settings-btn">&times;</button>
+            <h2 style="margin-bottom: 25px;">Настройки</h2>
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <button id="toggle-roll-sound-btn" class="settings-btn-item">🎲 Звук кубика: ВКЛ</button>
+                <button id="toggle-effects-btn" class="settings-btn-item">🎉 Эффект "6": ВКЛ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно (Таблица друзей) -->
+    <div class="modal" id="friends-modal" style="display: none;">
+        <div class="modal-content friends-modal-content">
+            <button class="close-btn" id="close-friends-btn">&times;</button>
+            <h2>Статистика друзей</h2>
+            <div class="table-container">
+                <table id="friends-table">
+                    <thead>
+                        <tr>
+                            <th>Имя</th>
+                            <th>Броски</th>
+                            <th>Сумма</th>
+                            <th>Удача</th>
+                            <th>Шестёрки</th>
+                            <th>Частая</th>
+                        </tr>
+                    </thead>
+                    <tbody id="friends-list">
+                    </tbody>
+                </table>
+            </div>
+            <div class="chart-container" style="position: relative; height:300px; width:100%; margin-top: 15px;">
+                <canvas id="statsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js?v=19"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "Игра в Кубик",
+  "short_name": "Кубик",
+  "description": "Мобильное приложение для игры в кубик с друзьями",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "app-icon.jpg",
+      "sizes": "192x192 512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
