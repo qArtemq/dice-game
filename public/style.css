@@ -13,6 +13,8 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    touch-action: none; /* Запрещаем скролл и жесты браузера */
+    overscroll-behavior: none; /* Запрещаем pull-to-refresh */
 }
 
 .top-buttons-container {
@@ -225,6 +227,7 @@ body {
     width: 95%;
     max-width: 500px;
     position: relative;
+    touch-action: auto;
 }
 
 .close-btn {
@@ -313,6 +316,7 @@ body {
     overflow-y: auto;
     overflow-x: auto;
     margin-top: 10px;
+    touch-action: auto; /* Разрешаем скролл внутри таблицы */
 }
 
 table {

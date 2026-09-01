@@ -338,8 +338,18 @@ function initFaces() {
     drawDots(document.getElementById('face-bottom'), 5);
 }
 
-// Бросок (теперь клик по всему экрану, кроме кнопок и истории)
-document.addEventListener('click', (e) => {
+document.addEventListener('pointerdown', (e) => {
+    // Разблокировка аудио для iOS/Android
+    if (!window.audioUnlocked) {
+        winAudio.volume = 0;
+        winAudio.play().then(() => {
+            winAudio.pause();
+            winAudio.currentTime = 0;
+            winAudio.volume = 1;
+        }).catch(() => {});
+        window.audioUnlocked = true;
+    }
+
     // Строго игнорируем клики по любым элементам интерфейса
     if (e.target.closest('.bottom-area') || 
         e.target.closest('.modal') || 
